@@ -17,19 +17,17 @@ import pdb
 def S(x1,x2,geodesic,sigma_clr=10):
 	return math.exp(-pow(geodesic[x1,x2],2)/(2*sigma_clr*sigma_clr))
 
-def cost_function(adjacency,smoothness,w_bg,wCtr):
+def cost_function(smoothness,w_bg,wCtr):
 	n = len(w_bg)
 	A = np.zeros((n,n))
 	b = np.zeros((n))
-
-	alpha = 1.0
 
 	for x in xrange(0,n):
 		A[x,x] = 2 * w_bg[x] + 2 * (wCtr[x])
 		b[x] = 2 * wCtr[x]
 		for y in xrange(0,n):
-			A[x,x] += 2 * alpha * smoothness[x,y]
-			A[x,y] -= 2 * alpha * smoothness[x,y]
+			A[x,x] += 2 * smoothness[x,y]
+			A[x,y] -= 2 * smoothness[x,y]
 	
 	x = np.linalg.solve(A, b)
 
@@ -204,8 +202,7 @@ def get_saliency_rbd(img_path):
 	img_disp1 = img_gray.copy()
 	img_disp2 = img_gray.copy()
 
-	print('Optimising ... ')
-	x = cost_function(adjacency,smoothness,w_bg,wCtr)
+	x = cost_function(smoothness,w_bg,wCtr)
 
 	for v in vertices:
 		img_disp1[grid == v] = x[v]
