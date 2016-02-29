@@ -17,26 +17,23 @@ import pdb
 def S(x1,x2,geodesic,sigma_clr=10):
 	return math.exp(-pow(geodesic[x1,x2],2)/(2*sigma_clr*sigma_clr))
 
-def cost_function(x,adjacency,smoothness,w_bg,wCtr):
-	cost = 0.0
-	for i in xrange(0,len(x)):
-		cost += w_bg[i] * x[i] * x[i]
-		cost += wCtr[i] * (x[i] - 1) * (x[i] - 1)
-		for j in xrange(0,len(x)):
-			cost+= adjacency[i,j] * smoothness[i,j] * (x[i] - x[j])*(x[i] - x[j])
-	print cost
-	return cost
+def cost_function(adjacency,smoothness,w_bg,wCtr):
+	n = len(w_bg)
+	A = np.zeros((n,n))
+	b = np.zeros((n))
 
-def diff_cost_function(x,adjacency,smoothness,w_bg,wCtr):
-	diff = np.zeros(len(x))
-	for i in xrange(0,len(x)):
-		diff[i] += 2 * w_bg[i] * x[i]
-		diff[i] += 2 * wCtr[i] * (x[i] - 1)
-		for j in xrange(0,len(x)):
-			diff[i] += 2 * adjacency[i,j] * smoothness[i,j] * (x[i] - x[j])
-			diff[j] += 2 * adjacency[i,j] * smoothness[i,j] * (x[j] - x[i])
-	return diff
+	alpha = 1.0
 
+	for x in xrange(0,n):
+		A[x,x] = 2 * w_bg[x] + 2 * (wCtr[x])
+		b[x] = 2 * wCtr[x]
+		for y in xrange(0,n):
+			A[x,x] += 2 * alpha * smoothness[x,y]
+			A[x,y] -= 2 * alpha * smoothness[x,y]
+	
+	x = np.linalg.solve(A, b)
+
+	return x
 
 def path_length(path,G):
 	dist = 0.0
@@ -159,6 +156,10 @@ def get_saliency_rbd(img_path):
 		adjacency[pt1,pt2] = 1
 		adjacency[pt2,pt1] = 1
 
+	for v1 in vertices:
+		for v2 in vertices:
+			smoothness[v1,v2] = adjacency[v1,v2] * smoothness[v1,v2]
+
 	area = dict()
 	len_bnd = dict()
 	bnd_con = dict()
@@ -204,11 +205,10 @@ def get_saliency_rbd(img_path):
 	img_disp2 = img_gray.copy()
 
 	print('Optimising ... ')
-	x0 = 0.5 * np.ones(num_segments)
-	res = minimize(cost_function, x0, method='BFGS',jac=diff_cost_function,args=(adjacency,smoothness,w_bg,wCtr),tol=10,options={'gtol': 1e-2, 'disp': True, 'maxiter': 10})
+	x = cost_function(adjacency,smoothness,w_bg,wCtr)
 
 	for v in vertices:
-		img_disp1[grid == v] = res.x[v]
+		img_disp1[grid == v] = x[v]
 
 	img_disp2 = img_disp1.copy()
 	img_disp = np.zeros((img_disp1.shape[0],img_disp1.shape[1],3))
