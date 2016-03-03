@@ -17,7 +17,7 @@ import pdb
 def S(x1,x2,geodesic,sigma_clr=10):
 	return math.exp(-pow(geodesic[x1,x2],2)/(2*sigma_clr*sigma_clr))
 
-def cost_function(smoothness,w_bg,wCtr):
+def compute_saliency_cost(smoothness,w_bg,wCtr):
 	n = len(w_bg)
 	A = np.zeros((n,n))
 	b = np.zeros((n))
@@ -68,6 +68,7 @@ def get_saliency_rbd(img_path):
 
 	# Saliency map calculation based on:
 	# Saliency Optimization from Robust Background Detection, Wangjiang Zhu, Shuang Liang, Yichen Wei and Jian Sun, IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2014
+	print('computing colors and loading')
 
 	img = skimage.io.imread(img_path)
 
@@ -77,7 +78,7 @@ def get_saliency_rbd(img_path):
 
 	img_gray = img_as_float(skimage.color.rgb2gray(img))
 
-	segments_slic = slic(img_rgb, n_segments=250, compactness=10, sigma=1, enforce_connectivity=True)
+	segments_slic = slic(img_rgb, n_segments=250, compactness=10, sigma=1, enforce_connectivity=False)
 
 	num_segments = len(np.unique(segments_slic))
 
@@ -134,8 +135,11 @@ def get_saliency_rbd(img_path):
 	sigma_bndcon = 1.0
 	sigma_spa = 0.25
 	mu = 0.1
+	print('getting shortest paths')
 
 	all_shortest_paths_color = nx.shortest_path(G,source=None,target=None,weight='weight')
+
+	print('computing intermediate vals')
 
 	for v1 in vertices:
 		for v2 in vertices:
@@ -165,6 +169,8 @@ def get_saliency_rbd(img_path):
 	ctr = dict()
 	wCtr = dict()
 
+	print('computing fg/bg costs')
+
 	for v1 in vertices:
 		area[v1] = 0
 		len_bnd[v1] = 0
@@ -189,6 +195,7 @@ def get_saliency_rbd(img_path):
 			wCtr[v1] += d_app * w_spa *  w_bg[v2]
 
 	# normalise value for wCtr
+	print('normalising vals')
 
 	min_value = min(wCtr.values())
 	max_value = max(wCtr.values())
@@ -202,7 +209,8 @@ def get_saliency_rbd(img_path):
 	img_disp1 = img_gray.copy()
 	img_disp2 = img_gray.copy()
 
-	x = cost_function(smoothness,w_bg,wCtr)
+	print('computing saliency cost')
+	x = compute_saliency_cost(smoothness,w_bg,wCtr)
 
 	for v in vertices:
 		img_disp1[grid == v] = x[v]
@@ -217,8 +225,6 @@ def get_saliency_rbd(img_path):
 		img_disp[:,:,1] = img_disp2
 		img_disp[:,:,2] = img_disp2
 
-
-
 	return img_disp1
 
 def get_saliency_ft(img_path):
@@ -229,7 +235,7 @@ def get_saliency_ft(img_path):
 
 	img_rgb = img_as_float(img)
 
-	img_lab = img_rgb 
+	img_lab = skimage.color.rgb2lab(img_rgb) 
 
 	mean_val = np.mean(img_rgb,axis=(0,1))
 
@@ -249,25 +255,3 @@ def get_saliency_ft(img_path):
 	sal = np.linalg.norm(mean_val - im_blurred,axis = 2)
 
 	return sal
-
-def binarise_saliency_map(saliency_map,method='clustering',threshold=0.5):
-
-	if len(saliency_map.shape) != 2:
-		print('Saliency map must be 2D')
-		return 0
-
-	if method == 'fixed':
-		return (saliency_map > threshold)
-
-	elif method == 'adaptive':
-		adaptive_threshold = 2.0 * saliency_map.mean()
-		print adaptive_threshold
-		return (saliency_map > adaptive_threshold)
-
-	elif method == 'clustering':
-		print('Not yet implemented')
-		return 0
-
-	else:
-		print("Method must be one of fixed, adaptive or clustering")
-		return 0
