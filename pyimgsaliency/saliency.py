@@ -225,6 +225,8 @@ def get_saliency_rbd(img_path):
 		img_disp[:,:,1] = img_disp2
 		img_disp[:,:,2] = img_disp2
 
+	max_value = np.max(img_disp1)
+	img_disp1 = 255.0 * img_disp1 / max_value
 	return img_disp1
 
 def get_saliency_ft(img_path):

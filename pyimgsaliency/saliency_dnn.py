@@ -186,12 +186,18 @@ for i in range(5):
 print('x shape = ' + str(x.shape))
 print('img_orig shape = ' + str(img_orig.shape))
 
-sal = img_orig[0,:,:,:] - x[0,:,:,:]
+sal = sal[0,:,:,:]
+img_orig = img_orig[0,:,:,:]
+
+sal = img_orig - x
+
 sal = np.mean(sal,axis=0)
+
 mean_saliency = np.mean(sal)
 #sal[sal < mean_saliency] = 0
 sal = np.maximum(sal - mean_saliency,0)
-cv2.imwrite('s.png',255*5*sal)
+max_val = np.max(sal)
+cv2.imwrite('s.png',255*(1.0/max_val)*sal)
 #sal_img = np.dstack((sal,sal,sal))
 #sal_img = deprocess_image(sal_img)
 #print('sal shape = ' + str(sal_img.shape))
