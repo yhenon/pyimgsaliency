@@ -1,6 +1,6 @@
 import numpy as np
 
-def binarise_saliency_map(saliency_map,method='clustering',threshold=0.5):
+def binarise_saliency_map(saliency_map,method='adaptive',threshold=0.5):
 
 	# check if input is a numpy array
 	if type(saliency_map).__module__ != np.__name__:
@@ -17,7 +17,6 @@ def binarise_saliency_map(saliency_map,method='clustering',threshold=0.5):
 
 	elif method == 'adaptive':
 		adaptive_threshold = 2.0 * saliency_map.mean()
-		print adaptive_threshold
 		return (saliency_map > adaptive_threshold)
 
 	elif method == 'clustering':
