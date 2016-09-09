@@ -2,7 +2,7 @@ import math
 import sys
 import operator
 import networkx as nx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.distance
 import scipy.signal
@@ -68,9 +68,11 @@ def get_saliency_rbd(img_path):
 
 	# Saliency map calculation based on:
 	# Saliency Optimization from Robust Background Detection, Wangjiang Zhu, Shuang Liang, Yichen Wei and Jian Sun, IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2014
-	print('computing colors and loading')
 
 	img = skimage.io.imread(img_path)
+
+	if len(img.shape) != 3: # got a grayscale image
+		img = skimage.color.gray2rgb(img)
 
 	img_lab = img_as_float(skimage.color.rgb2lab(img))
 
@@ -84,7 +86,6 @@ def get_saliency_rbd(img_path):
 
 	nrows, ncols = segments_slic.shape
 	max_dist = math.sqrt(nrows*nrows + ncols*ncols)
-	print("Slic number of segments: %d" % num_segments)
 
 	grid = segments_slic
 
@@ -135,11 +136,8 @@ def get_saliency_rbd(img_path):
 	sigma_bndcon = 1.0
 	sigma_spa = 0.25
 	mu = 0.1
-	print('getting shortest paths')
 
 	all_shortest_paths_color = nx.shortest_path(G,source=None,target=None,weight='weight')
-
-	print('computing intermediate vals')
 
 	for v1 in vertices:
 		for v2 in vertices:
@@ -169,8 +167,6 @@ def get_saliency_rbd(img_path):
 	ctr = dict()
 	wCtr = dict()
 
-	print('computing fg/bg costs')
-
 	for v1 in vertices:
 		area[v1] = 0
 		len_bnd[v1] = 0
@@ -195,7 +191,6 @@ def get_saliency_rbd(img_path):
 			wCtr[v1] += d_app * w_spa *  w_bg[v2]
 
 	# normalise value for wCtr
-	print('normalising vals')
 
 	min_value = min(wCtr.values())
 	max_value = max(wCtr.values())
@@ -209,25 +204,20 @@ def get_saliency_rbd(img_path):
 	img_disp1 = img_gray.copy()
 	img_disp2 = img_gray.copy()
 
-	print('computing saliency cost')
 	x = compute_saliency_cost(smoothness,w_bg,wCtr)
 
 	for v in vertices:
 		img_disp1[grid == v] = x[v]
 
 	img_disp2 = img_disp1.copy()
-	img_disp = np.zeros((img_disp1.shape[0],img_disp1.shape[1],3))
-	for i in np.arange(0.5,1.0,0.05):
-		img_disp2[img_disp1 < i] = 0
-		img_disp2[img_disp1 >= i] = 1
+	sal = np.zeros((img_disp1.shape[0],img_disp1.shape[1],3))
 
-		img_disp[:,:,0] = img_disp2
-		img_disp[:,:,1] = img_disp2
-		img_disp[:,:,2] = img_disp2
+	sal = img_disp2
+	sal_max = np.max(sal)
+	sal_min = np.min(sal)
+	sal = 255 * ((sal - sal_min) / (sal_max - sal_min))
 
-	max_value = np.max(img_disp1)
-	img_disp1 = 255.0 * img_disp1 / max_value
-	return img_disp1
+	return sal
 
 def get_saliency_ft(img_path):
 
@@ -255,5 +245,7 @@ def get_saliency_ft(img_path):
 	im_blurred = np.dstack([blurred_l,blurred_a,blurred_b])
 
 	sal = np.linalg.norm(mean_val - im_blurred,axis = 2)
-
+	sal_max = np.max(sal)
+	sal_min = np.min(sal)
+	sal = 255 * ((sal - sal_min) / (sal_max - sal_min))
 	return sal

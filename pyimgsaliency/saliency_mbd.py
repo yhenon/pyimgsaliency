@@ -2,7 +2,7 @@ import math
 import sys
 import operator
 import networkx as nx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.distance
 import scipy.signal
@@ -11,7 +11,7 @@ import skimage.io
 from skimage.segmentation import slic
 from skimage.util import img_as_float
 from scipy.optimize import minimize
-import pdb
+#import pdb
 
 def raster_scan(img,L,U,D):
 	n_rows = len(img)
@@ -73,7 +73,7 @@ def raster_scan_inv(img,L,U,D):
 				D[x][y] = b2
 				U[x][y] = max(u2,ix)
 				L[x][y] = min(l2,ix)
-				
+
 	return True
 
 def mbd(img, num_iters):
@@ -222,6 +222,8 @@ def get_saliency_mbd(input,method='b'):
 		#postprocessing
 
 		# apply centredness map
+		sal = sal / np.max(sal)
+		
 		s = np.mean(sal)
 		alpha = 50.0
 		delta = alpha * math.sqrt(s)
