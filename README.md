@@ -9,10 +9,14 @@ The following algorithms are currently implemented for calculating saliency maps
 
 An example of the use of this package can be seen at demo.py
 
-![bird](http://imgur.com/kVLfhwy "Original image")
+Original image:
+![bird](http://imgur.com/kVLfhwy.png "Original image")
 
+Saliency detection with minimum barrier detection:
 ![bird](http://imgur.com/5Zu7T5V.png "mbd")
+Saliency detection with robust background detection:
 ![bird](http://imgur.com/SgywutJ.png "rbd")
+Saliency detection with frequency-tuned method:
 ![bird](http://imgur.com/t8NeAVi.png "ft")
 
 
