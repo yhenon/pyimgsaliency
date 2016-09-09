@@ -11,9 +11,9 @@ An example of the use of this package can be seen at demo.py
 
 ![bird](http://imgur.com/kVLfhwy "Original image")
 
-![bird](http://imgur.com/5Zu7T5V "mbd")
-![bird](http://imgur.com/SgywutJ "rbd")
-![bird](http://imgur.com/t8NeAVi "ft")
+![bird](http://imgur.com/5Zu7T5V.png "mbd")
+![bird](http://imgur.com/SgywutJ.png "rbd")
+![bird](http://imgur.com/t8NeAVi.png "ft")
 
 
 License
