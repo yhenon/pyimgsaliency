@@ -4,7 +4,7 @@ def binarise_saliency_map(saliency_map,method='adaptive',threshold=0.5):
 
 	# check if input is a numpy array
 	if type(saliency_map).__module__ != np.__name__:
-		print 'Expected numpy array'
+		print('Expected numpy array')
 		return None
 
 	#check if input is 2D

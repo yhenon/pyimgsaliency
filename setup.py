@@ -7,5 +7,6 @@ setup(name='pyimgsaliency',
       author='Yann Henon',
       author_email='none',
       license='Apache',
+      install_requires=['sklearn', 'opencv-python', 'networkx', 'numpy', 'scipy', 'scikit-image'],
       packages=['pyimgsaliency'],
       zip_safe=False)
