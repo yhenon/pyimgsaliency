@@ -25,6 +25,11 @@ Saliency detection with frequency-tuned method:
 
 ![bird](http://imgur.com/t8NeAVi.png "ft")
 
+## Installation
 
-License
+Install using pip:
+
+`python -m pip install git+https://github.com/yhenon/pyimgsaliency.git`
+
+## License
 Provided under the Apache 2.0 License. Note that there might be additional restrictions on some algorithms. In particular, the authors of "Minimum Barrier Salient Object Detection at 80 FPS" note that their algorithm is patent pending and may not be used in commercial applications.
