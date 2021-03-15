@@ -22,10 +22,10 @@ def compute_saliency_cost(smoothness,w_bg,wCtr):
 	A = np.zeros((n,n))
 	b = np.zeros((n))
 
-	for x in xrange(0,n):
+	for x in range(0,n):
 		A[x,x] = 2 * w_bg[x] + 2 * (wCtr[x])
 		b[x] = 2 * wCtr[x]
-		for y in xrange(0,n):
+		for y in range(0,n):
 			A[x,x] += 2 * smoothness[x,y]
 			A[x,y] -= 2 * smoothness[x,y]
 	
@@ -35,7 +35,7 @@ def compute_saliency_cost(smoothness,w_bg,wCtr):
 
 def path_length(path,G):
 	dist = 0.0
-	for i in xrange(1,len(path)):
+	for i in range(1,len(path)):
 		dist += G[path[i - 1]][path[i]]['weight']
 	return dist
 
@@ -59,7 +59,7 @@ def make_graph(grid):
 	edges = np.unique(edge_hash)
 	# undo hashing
 	edges = [[vertices[x%num_vertices],
-			  vertices[x/num_vertices]] for x in edges] 
+			  vertices[int(x/num_vertices)]] for x in edges] 
  
 	return vertices, edges
 	
@@ -195,8 +195,8 @@ def get_saliency_rbd(img_path):
 	min_value = min(wCtr.values())
 	max_value = max(wCtr.values())
 
-	minVal = [key for key, value in wCtr.iteritems() if value == min_value]
-	maxVal = [key for key, value in wCtr.iteritems() if value == max_value]
+	minVal = [key for key, value in wCtr.items() if value == min_value]
+	maxVal = [key for key, value in wCtr.items() if value == max_value]
 
 	for v in vertices:
 		wCtr[v] = (wCtr[v] - min_value)/(max_value - min_value)
