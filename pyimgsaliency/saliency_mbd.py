@@ -17,8 +17,8 @@ def raster_scan(img,L,U,D):
 	n_rows = len(img)
 	n_cols = len(img[0])
 
-	for x in xrange(1,n_rows - 1):
-		for y in xrange(1,n_cols - 1):
+	for x in range(1,n_rows - 1):
+		for y in range(1,n_cols - 1):
 			ix = img[x][y]
 			d = D[x][y]
 
@@ -48,8 +48,8 @@ def raster_scan_inv(img,L,U,D):
 	n_rows = len(img)
 	n_cols = len(img[0])
 
-	for x in xrange(n_rows - 2,1,-1):
-		for y in xrange(n_cols - 2,1,-1):
+	for x in range(n_rows - 2,1,-1):
+		for y in range(n_cols - 2,1,-1):
 
 			ix = img[x][y]
 			d = D[x][y]
@@ -99,13 +99,26 @@ def mbd(img, num_iters):
 	U_list = U.tolist()
 	D_list = D.tolist()
 
-	for x in xrange(0,num_iters):
+	for x in range(0,num_iters):
 		if x%2 == 1:
 			raster_scan(img_list,L_list,U_list,D_list)
 		else:
 			raster_scan_inv(img_list,L_list,U_list,D_list)
 
 	return np.array(D_list)
+
+
+def is_positive_definite_matrix(m):
+	tolerance = 1e-10
+	eigenvalues = np.linalg.eigvals(m)
+	return np.all(eigenvalues > tolerance)
+
+
+def regularize_matrix(m):
+	if not is_positive_definite_matrix(m):
+		epsilon = 1e-6
+		m = m + np.eye(m.shape[0]) * epsilon
+	return m
 
 
 def get_saliency_mbd(input,method='b'):
@@ -161,6 +174,11 @@ def get_saliency_mbd(input,method='b'):
 
 			cov_top = np.cov(px_top.T)
 			cov_bottom = np.cov(px_bottom.T)
+
+			cov_left = regularize_matrix(cov_left)
+			cov_right = regularize_matrix(cov_right)
+			cov_top = regularize_matrix(cov_top)
+			cov_bottom = regularize_matrix(cov_bottom)
 
 			cov_left = np.linalg.inv(cov_left)
 			cov_right = np.linalg.inv(cov_right)
